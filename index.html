@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>SnakeFlow — A Caroline Nowak Snake Game</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
 <style>
@@ -16,6 +16,12 @@
     font-family: 'Rajdhani', sans-serif;
     color: #eee;
     cursor: crosshair;
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    overscroll-behavior: none;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
 
   /* Scanlines */
@@ -360,6 +366,147 @@
     0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
     100% { transform: translateY(100vh) rotate(720deg); opacity: 0.3; }
   }
+  /* ═══════ D-PAD TOUCH CONTROLS ═══════ */
+  #dpad {
+    display: none;
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    width: 160px;
+    height: 160px;
+  }
+  .dpad-btn {
+    position: absolute;
+    width: 52px; height: 52px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: rgba(255,255,255,0.4);
+    cursor: pointer;
+    transition: background 0.1s, transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .dpad-btn:active, .dpad-btn.pressed {
+    background: rgba(255,255,255,0.15);
+    transform: scale(0.92);
+    color: rgba(255,255,255,0.8);
+  }
+  .dpad-up    { top: 0; left: 50%; transform: translateX(-50%); }
+  .dpad-up:active { transform: translateX(-50%) scale(0.92); }
+  .dpad-down  { bottom: 0; left: 50%; transform: translateX(-50%); }
+  .dpad-down:active { transform: translateX(-50%) scale(0.92); }
+  .dpad-left  { top: 50%; left: 0; transform: translateY(-50%); }
+  .dpad-left:active { transform: translateY(-50%) scale(0.92); }
+  .dpad-right { top: 50%; right: 0; transform: translateY(-50%); }
+  .dpad-right:active { transform: translateY(-50%) scale(0.92); }
+  .dpad-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    pointer-events: none;
+  }
+
+  /* Tap-to-restart for mobile (overlaid on game over / win) */
+  .tap-restart {
+    display: none;
+    margin-top: 16px;
+    padding: 14px 36px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.7);
+    font-family: 'Orbitron', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transition: background 0.2s;
+  }
+  .tap-restart:active {
+    background: rgba(255,255,255,0.18);
+  }
+
+  /* ═══════ MOBILE RESPONSIVE ═══════ */
+  @media (max-width: 600px) {
+    #dpad { display: block; }
+    .tap-restart { display: inline-block; }
+
+    #hud {
+      height: 42px;
+      gap: 12px;
+      padding: 0 10px;
+      flex-wrap: nowrap;
+    }
+    .hud-logo { font-size: 14px; letter-spacing: 0.1em; }
+    .hud-credit { display: none; }
+    .hud-stat { font-size: 11px; }
+    .hud-stat .val { font-size: 13px; }
+
+    #canvas-wrap { padding-top: 42px; padding-bottom: 190px; }
+
+    #msg { bottom: 188px; font-size: 11px; }
+
+    /* Start screen mobile */
+    #start-screen .brand-block h1 {
+      font-size: 28px;
+      letter-spacing: 0.15em;
+    }
+    #start-screen .brand-block .credit { font-size: 12px; }
+
+    .how-to-play {
+      padding: 16px 20px;
+      max-width: 92vw;
+      margin-bottom: 18px;
+    }
+    .how-to-play h2 { font-size: 12px; margin-bottom: 10px; }
+    .rule-icon { width: 26px; height: 26px; font-size: 13px; }
+    .rule-text { font-size: 12px; line-height: 1.4; }
+    .rule-row { gap: 8px; margin-bottom: 8px; }
+    .start-hint { font-size: 12px; }
+
+    .overlay-screen {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 20px 12px;
+      justify-content: flex-start;
+      padding-top: 10vh;
+    }
+
+    /* Game over mobile */
+    #gameover-screen h1 { font-size: 30px; }
+    #gameover-screen .final-score { font-size: 22px; }
+    #gameover-screen .restart-hint { font-size: 12px; }
+
+    /* Win screen mobile */
+    #win-screen .win-title { font-size: 20px; letter-spacing: 0.06em; }
+    .punch-container { width: 160px; height: 160px; }
+    .punch-svg-wrap svg { width: 160px; height: 160px; }
+    #win-screen .win-subtitle { font-size: 14px; }
+    #win-screen .win-score { font-size: 18px; }
+  }
+
+  /* Even smaller phones */
+  @media (max-width: 380px) {
+    #start-screen .brand-block h1 { font-size: 22px; }
+    #dpad { width: 140px; height: 140px; bottom: 16px; }
+    .dpad-btn { width: 44px; height: 44px; font-size: 18px; border-radius: 10px; }
+    #canvas-wrap { padding-bottom: 170px; }
+    #msg { bottom: 168px; }
+  }
 </style>
 </head>
 <body>
@@ -384,6 +531,15 @@
 </div>
 <div id="msg">Arrow keys or WASD</div>
 
+<!-- ═══════ D-PAD (mobile only) ═══════ -->
+<div id="dpad">
+  <div class="dpad-btn dpad-up" data-dir="up">▲</div>
+  <div class="dpad-btn dpad-down" data-dir="down">▼</div>
+  <div class="dpad-btn dpad-left" data-dir="left">◀</div>
+  <div class="dpad-btn dpad-right" data-dir="right">▶</div>
+  <div class="dpad-center"></div>
+</div>
+
 <!-- ═══════ START SCREEN ═══════ -->
 <div class="overlay-screen" id="start-screen">
   <div class="brand-block">
@@ -394,7 +550,7 @@
     <h2>How to Play</h2>
     <div class="rule-row">
       <div class="rule-icon icon-rainbow">🐍</div>
-      <div class="rule-text"><strong>You start as a single dot.</strong> Use arrow keys or WASD to slither around the grid.</div>
+      <div class="rule-text"><strong>You start as a single dot.</strong> Use arrow keys, WASD, or swipe / D-pad on mobile to slither around the grid.</div>
     </div>
     <div class="rule-row">
       <div class="rule-icon icon-food">●</div>
@@ -417,7 +573,7 @@
       <div class="rule-text"><strong>Eat 5 food dots to win!</strong> Reach the goal and earn a special surprise.</div>
     </div>
   </div>
-  <div class="start-hint">Press any arrow key or WASD to start</div>
+  <div class="start-hint" id="start-hint">Press any arrow key or WASD to start</div>
 </div>
 
 <!-- ═══════ GAME OVER ═══════ -->
@@ -426,6 +582,7 @@
   <div class="final-score" id="go-score">0</div>
   <div class="final-length" id="go-length">Length: 1</div>
   <div class="restart-hint">Press Space to play again</div>
+  <button class="tap-restart" id="go-restart">TAP TO RESTART</button>
 </div>
 
 <!-- ═══════ WIN SCREEN ═══════ -->
@@ -511,6 +668,7 @@
   <div class="win-subtitle">Punch-kun says well done!</div>
   <div class="win-score" id="win-score">Score: 0</div>
   <div class="restart-hint">Press Space to play again</div>
+  <button class="tap-restart" id="win-restart">TAP TO RESTART</button>
 </div>
 
 
@@ -522,8 +680,10 @@
   const COLS = 32, ROWS = 24;
 
   function resize() {
-    const maxW = window.innerWidth - 24;
-    const maxH = window.innerHeight - 80;
+    const isMobileView = window.innerWidth <= 600;
+    const maxW = window.innerWidth - (isMobileView ? 8 : 24);
+    const dpadSpace = isMobileView ? 200 : 0;
+    const maxH = window.innerHeight - 80 - dpadSpace;
     const aspect = COLS / ROWS;
     let w = maxW, h = w / aspect;
     if (h > maxH) { h = maxH; w = h * aspect; }
@@ -715,16 +875,20 @@
     }
   });
 
-  // Touch controls
+  // Touch controls — swipe anywhere on screen
   let touchStart = null;
   document.addEventListener('touchstart', e => {
+    e.preventDefault(); // Prevent iOS scroll/zoom
     touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  });
+  }, { passive: false });
+  document.addEventListener('touchmove', e => {
+    e.preventDefault(); // Prevent iOS rubber-band
+  }, { passive: false });
   document.addEventListener('touchend', e => {
     if (!touchStart) return;
     const dx = e.changedTouches[0].clientX - touchStart.x;
     const dy = e.changedTouches[0].clientY - touchStart.y;
-    if (Math.abs(dx) < 15 && Math.abs(dy) < 15) { touchStart = null; return; }
+    if (Math.abs(dx) < 20 && Math.abs(dy) < 20) { touchStart = null; return; }
     let d;
     if (Math.abs(dx) > Math.abs(dy)) {
       d = dx > 0 ? { x:1, y:0 } : { x:-1, y:0 };
@@ -742,6 +906,54 @@
     if (!running && !gameOver && !won) running = true;
     touchStart = null;
   });
+
+  // D-pad button controls (mobile)
+  const DPAD_DIRS = {
+    up: {x:0,y:-1}, down: {x:0,y:1}, left: {x:-1,y:0}, right: {x:1,y:0}
+  };
+  document.querySelectorAll('.dpad-btn').forEach(btn => {
+    function handleDpad(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const d = DPAD_DIRS[btn.dataset.dir];
+      if (!d) return;
+      if (!started) {
+        started = true;
+        startScreen.classList.add('hidden');
+        resetGame();
+        running = true;
+        nextDir = d;
+        return;
+      }
+      if (won || gameOver) return;
+      if (snake.length > 1 && d.x === -dir.x && d.y === -dir.y) return;
+      nextDir = d;
+      if (!running && !gameOver && !won) running = true;
+    }
+    btn.addEventListener('touchstart', handleDpad, { passive: false });
+    btn.addEventListener('mousedown', handleDpad);
+  });
+
+  // Tap-to-restart buttons (mobile)
+  function restartFromOverlay(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    gameoverScreen.classList.add('hidden');
+    winScreen.classList.add('hidden');
+    resetGame();
+    running = true;
+  }
+  document.getElementById('go-restart').addEventListener('click', restartFromOverlay);
+  document.getElementById('go-restart').addEventListener('touchend', restartFromOverlay);
+  document.getElementById('win-restart').addEventListener('click', restartFromOverlay);
+  document.getElementById('win-restart').addEventListener('touchend', restartFromOverlay);
+
+  // Detect mobile and update hint text
+  const isMobile = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  if (isMobile) {
+    document.getElementById('start-hint').textContent = 'Swipe or tap a direction to start';
+    msgEl.textContent = 'Swipe or use the D-pad to move';
+  }
 
   /* ═══════ Game Logic ═══════ */
   function advance() {
