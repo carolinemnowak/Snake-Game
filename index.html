@@ -12,6 +12,67 @@
     font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     color: #eee;
   }
+
+  /* New title bar */
+  #titlebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 8px 16px 6px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 16px;
+    background: linear-gradient(
+      90deg,
+      rgba(255,0,128,0.25),
+      rgba(0,255,255,0.25),
+      rgba(255,255,0,0.25)
+    );
+    backdrop-filter: blur(10px);
+    z-index: 10;
+  }
+  #title-main {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: linear-gradient(
+      90deg,
+      #ff6af0,
+      #ff9d45,
+      #f9ff6a,
+      #6affb5,
+      #6af7ff,
+      #c36aff
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 10px rgba(0,0,0,0.8);
+  }
+  #title-sub {
+    display: flex;
+    flex-direction: column;
+    font-size: 11px;
+    line-height: 1.1;
+    color: #ffffff;
+    text-shadow: 0 0 8px rgba(0,0,0,0.9);
+  }
+  #title-sub .sub-top {
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  #title-sub .sub-bottom {
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 2px;
+  }
+  #title-sub .sub-bottom span {
+    display: block;
+  }
+
   #wrap {
     position: fixed;
     inset: 0;
@@ -20,6 +81,8 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
+    /* push game down so the title bar doesn’t overlap */
+    margin-top: 58px;
   }
   canvas {
     box-shadow: 0 0 40px rgba(0,0,0,0.9);
@@ -52,6 +115,26 @@
 </style>
 </head>
 <body>
+
+<div id="titlebar">
+  <div id="title-main">SnakeFlow</div>
+  <div id="title-sub">
+    <span class="sub-top">A Caroline Nowak</span>
+    <span class="sub-bottom">
+      <span>S</span>
+      <span>n</span>
+      <span>a</span>
+      <span>k</span>
+      <span>e</span>
+      <br>
+      <span>G</span>
+      <span>a</span>
+      <span>m</span>
+      <span>e</span>
+    </span>
+  </div>
+</div>
+
 <div id="wrap">
   <canvas id="game" width="640" height="480"></canvas>
   <div id="ui">
@@ -124,7 +207,6 @@
   }
 
   function createWallPortals() {
-    // Four paired wall portals (top-bottom, left-right). [web:3]
     return [
       [{x: 0, y: 0}, {x: COLS-1, y: ROWS-1}],
       [{x: COLS-1, y: 0}, {x: 0, y: ROWS-1}],
@@ -159,7 +241,6 @@
   }
 
   function softClear() {
-    // Semi-transparent clear for motion trails.[web:5]
     ctx.fillStyle = 'rgba(0,0,8,0.22)';
     ctx.fillRect(0,0,W,H);
   }
@@ -171,7 +252,6 @@
     if (!lastStepTime) lastStepTime = timestamp;
     const dt = timestamp - lastStepTime;
 
-    // Psychedelic blast animation
     if (blastActive) {
       const t = (timestamp - blastStart) / BLAST_DURATION;
       if (t >= 1) {
@@ -191,7 +271,6 @@
   function advance() {
     if (gameOver) return;
 
-    // Prevent 180° instant reverse
     if (nextDir && !(nextDir.x === -dir.x && nextDir.y === -dir.y)) {
       dir = nextDir;
     }
@@ -201,7 +280,6 @@
     let ny = head.y + dir.y;
 
     let portalUsed = false;
-    // Portal walls: go out on one edge, reappear on another portal. [web:3]
     if (nx < 0 || nx >= COLS || ny < 0 || ny >= ROWS) {
       const hit = {x: head.x + dir.x, y: head.y + dir.y};
       for (const pair of portalPairs) {
@@ -210,7 +288,6 @@
         if (cellsEqual(hit,b)) { nx = a.x; ny = a.y; portalUsed = true; break; }
       }
       if (!portalUsed) {
-        // Fallback wrap
         nx = (nx + COLS) % COLS;
         ny = (ny + ROWS) % ROWS;
       }
@@ -218,7 +295,6 @@
 
     const newHead = {x:nx, y:ny};
 
-    // Self collision ends game. [web:7]
     if (snake.some(seg => seg.x === newHead.x && seg.y === newHead.y)) {
       gameOver = true;
       running = false;
@@ -235,7 +311,6 @@
       score += 10;
       foodsEaten++;
       foodsSinceBlast++;
-      // Trigger psychedelic grid melt every 10 foods
       if (foodsSinceBlast >= 10) {
         foodsSinceBlast = 0;
         triggerBlast();
@@ -259,7 +334,6 @@
   }
 
   function applyPower(type) {
-    // Grid warp: random shuffle of portal pairs and subtle board spin effect.[web:1]
     if (type === 'warp') {
       msgEl.textContent = 'Grid warped. Reality is optional.';
       portalPairs = createWallPortals().map(pair => {
@@ -268,7 +342,6 @@
       });
       quickSpin();
     }
-    // Extra portals and mini-blast
     else if (type === 'portal') {
       msgEl.textContent = 'Walls crack open into portals.';
       portalPairs = createWallPortals().concat([
@@ -277,7 +350,6 @@
       ]);
       triggerMiniBlast();
     }
-    // Speed boost
     else if (type === 'speed') {
       msgEl.textContent = 'Time accelerates.';
       speedMs = Math.max(60, speedMs - 15);
@@ -330,7 +402,6 @@
   }
 
   function drawBlastFrame(t) {
-    // Grid melting using sinusoidal vertical offsets and hue cycling. [web:5][web:8]
     const bands = 40;
     const bandH = H / bands;
     const wobbleAmp = 20;
@@ -339,197 +410,4 @@
     for (let i=0;i<bands;i++){
       const y = i * bandH;
       const phase = t*6 + i*0.4;
-      const offset = Math.sin(phase) * wobbleAmp * (1-t);
-      ctx.drawImage(canvas, 0, y, W, bandH, offset, y, W, bandH);
-    }
-    ctx.restore();
-
-    // Overlay neon color wash
-    const hue = (t*720) % 360;
-    const alpha = 0.7*(1-t);
-    ctx.fillStyle = `hsla(${hue},100%,50%,${alpha})`;
-    ctx.fillRect(0,0,W,H);
-
-    if (t>0.5){
-      drawGridOnly(1-t);
-    }
-  }
-
-  function drawGridOnly(intensity=1) {
-    // simple background grid
-    ctx.save();
-    ctx.translate(OFFSET_X, OFFSET_Y);
-    ctx.lineWidth = 1;
-    const alpha = 0.12*intensity;
-    for (let x=0;x<=COLS;x++){
-      ctx.strokeStyle = `rgba(80,80,140,${alpha})`;
-      ctx.beginPath();
-      ctx.moveTo(x*CELL+0.5,0);
-      ctx.lineTo(x*CELL+0.5,ROWS*CELL);
-      ctx.stroke();
-    }
-    for (let y=0;y<=ROWS;y++){
-      ctx.strokeStyle = `rgba(40,40,90,${alpha})`;
-      ctx.beginPath();
-      ctx.moveTo(0,y*CELL+0.5);
-      ctx.lineTo(COLS*CELL,y*CELL+0.5);
-      ctx.stroke();
-    }
-    ctx.restore();
-
-    // portals indicator
-    ctx.save();
-    ctx.translate(OFFSET_X, OFFSET_Y);
-    portalPairs.forEach(pair => {
-      pair.forEach(p => {
-        ctx.fillStyle = 'rgba(0,255,255,0.4)';
-        ctx.beginPath();
-        ctx.arc((p.x+0.5)*CELL,(p.y+0.5)*CELL,CELL*0.35,0,Math.PI*2);
-        ctx.fill();
-      });
-    });
-    ctx.restore();
-  }
-
-  function draw() {
-    // motion trail background
-    softClear();
-
-    // add head to trail
-    const head = snake[0];
-    trail.unshift({
-      x: head.x,
-      y: head.y,
-      born: performance.now()
-    });
-    if (trail.length > TRAIL_MAX) trail.pop();
-
-    drawGridOnly();
-
-    // Rainbow trail: older segments fade & shift hue. [web:8]
-    ctx.save();
-    ctx.translate(OFFSET_X, OFFSET_Y);
-    for (let i=0;i<trail.length;i++){
-      const p = trail[i];
-      const life = i / TRAIL_MAX;
-      const hue = (life*360 + performance.now()*0.06) % 360;
-      const size = CELL * (0.2 + 0.8*(1-life));
-      const alpha = 0.1 + 0.9*(1-life);
-      ctx.fillStyle = `hsla(${hue},100%,50%,${alpha})`;
-      ctx.beginPath();
-      ctx.arc((p.x+0.5)*CELL,(p.y+0.5)*CELL,size*0.5,0,Math.PI*2);
-      ctx.fill();
-    }
-
-    // Snake body with neon gradient
-    for (let i=snake.length-1;i>=0;i--){
-      const seg = snake[i];
-      const life = i / Math.max(1,snake.length-1);
-      const hue = (life*260 + performance.now()*0.08) % 360;
-      ctx.fillStyle = `hsl(${hue},100%,60%)`;
-      ctx.shadowColor = `hsl(${hue},100%,60%)`;
-      ctx.shadowBlur = 12 * (1-life);
-      const x = seg.x*CELL;
-      const y = seg.y*CELL;
-      ctx.beginPath();
-      ctx.roundRect(x+2,y+2,CELL-4,CELL-4,4);
-      ctx.fill();
-    }
-
-    // head overlay
-    const h = snake[0];
-    ctx.shadowBlur = 20;
-    ctx.shadowColor = '#fff';
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.arc((h.x+0.5)*CELL,(h.y+0.5)*CELL,CELL*0.28,0,Math.PI*2);
-    ctx.fill();
-
-    // food
-    if (food){
-      const x = food.x*CELL;
-      const y = food.y*CELL;
-      const pulse = 0.5 + 0.5*Math.sin(performance.now()*0.006);
-      const hue = (foodsEaten*40 + performance.now()*0.08) % 360;
-      ctx.fillStyle = `hsl(${hue},100%,60%)`;
-      ctx.shadowColor = ctx.fillStyle;
-      ctx.shadowBlur = 18;
-      ctx.beginPath();
-      ctx.arc((food.x+0.5)*CELL,(food.y+0.5)*CELL,CELL*(0.25+0.1*pulse),0,Math.PI*2);
-      ctx.fill();
-    }
-
-    // power-up
-    if (power){
-      const p = power.pos;
-      const x = p.x*CELL;
-      const y = p.y*CELL;
-      const t = performance.now()*0.004;
-      let hue;
-      if (power.type === 'warp') hue = 280;
-      else if (power.type === 'portal') hue = 180;
-      else hue = 60;
-      const r = CELL*0.3 + CELL*0.06*Math.sin(t*4);
-      ctx.strokeStyle = `hsl(${hue},100%,70%)`;
-      ctx.lineWidth = 2;
-      ctx.shadowColor = ctx.strokeStyle;
-      ctx.shadowBlur = 14;
-      ctx.beginPath();
-      ctx.arc((p.x+0.5)*CELL,(p.y+0.5)*CELL,r,0,Math.PI*2);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc((p.x+0.5)*CELL,(p.y+0.5)*CELL,r*0.5,0,Math.PI*2);
-      ctx.stroke();
-    }
-
-    ctx.restore();
-  }
-
-  // input
-  window.addEventListener('keydown', e => {
-    const key = e.key;
-    if (key === ' '){
-      if (gameOver) {
-        resetGame();
-        running = true;
-      } else {
-        running = !running;
-        if (running) msgEl.textContent = 'Flow state engaged.';
-        else msgEl.textContent = 'Paused. Press Space to continue.';
-      }
-      return;
-    }
-    if (DIRS[key]){
-      nextDir = {...DIRS[key]};
-      if (!running && !gameOver){
-        running = true;
-        msgEl.textContent = 'Flow state engaged.';
-      }
-    }
-  });
-
-  // helpers for roundRect on older browsers
-  if (!CanvasRenderingContext2D.prototype.roundRect) {
-    CanvasRenderingContext2D.prototype.roundRect = function(x,y,w,h,r) {
-      const radius = r || 0;
-      this.beginPath();
-      this.moveTo(x+radius,y);
-      this.lineTo(x+w-radius,y);
-      this.quadraticCurveTo(x+w,y,x+w,y+radius);
-      this.lineTo(x+w,y+h-radius);
-      this.quadraticCurveTo(x+w,y+h,x+w-radius,y+h);
-      this.lineTo(x+radius,y+h);
-      this.quadraticCurveTo(x,y+h,x,y+h-radius);
-      this.lineTo(x,y+radius);
-      this.quadraticCurveTo(x,y,x+radius,y);
-      this.closePath();
-      return this;
-    };
-  }
-
-  resetGame();
-  requestAnimationFrame(step);
-})();
-</script>
-</body>
-</html>
+      const offset
