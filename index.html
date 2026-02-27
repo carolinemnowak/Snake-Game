@@ -229,12 +229,32 @@
   .icon-skull { background: rgba(255,45,70,0.08); color: #ff2d55; }
   .icon-trophy { background: rgba(255,215,0,0.08); color: #ffd700; }
 
-  .start-hint {
-    font-size: 13px;
-    color: rgba(255,255,255,0.25);
-    letter-spacing: 0.1em;
+  .start-btn {
+    margin-top: 6px;
+    padding: 14px 48px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.5);
+    font-family: 'Orbitron', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
-    animation: pulse 1.8s ease-in-out infinite;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+  .start-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.8);
+    border-color: rgba(255,255,255,0.2);
+  }
+  .start-btn:active {
+    background: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.9);
+    transform: scale(0.97);
   }
   @keyframes pulse {
     0%, 100% { opacity: 0.25; }
@@ -417,6 +437,32 @@
     pointer-events: none;
   }
 
+  .arrow-icon {
+    display: block;
+    width: 0; height: 0;
+    border-style: solid;
+  }
+  .arrow-up {
+    border-width: 0 7px 10px 7px;
+    border-color: transparent transparent rgba(255,255,255,0.4) transparent;
+  }
+  .arrow-down {
+    border-width: 10px 7px 0 7px;
+    border-color: rgba(255,255,255,0.4) transparent transparent transparent;
+  }
+  .arrow-left {
+    border-width: 7px 10px 7px 0;
+    border-color: transparent rgba(255,255,255,0.4) transparent transparent;
+  }
+  .arrow-right {
+    border-width: 7px 0 7px 10px;
+    border-color: transparent transparent transparent rgba(255,255,255,0.4);
+  }
+  .dpad-btn:active .arrow-up { border-bottom-color: rgba(255,255,255,0.8); }
+  .dpad-btn:active .arrow-down { border-top-color: rgba(255,255,255,0.8); }
+  .dpad-btn:active .arrow-left { border-right-color: rgba(255,255,255,0.8); }
+  .dpad-btn:active .arrow-right { border-left-color: rgba(255,255,255,0.8); }
+
   /* Tap-to-restart for mobile (overlaid on game over / win) */
   .tap-restart {
     display: none;
@@ -460,12 +506,14 @@
 
     #msg { bottom: 188px; font-size: 11px; }
 
-    /* Start screen mobile */
+    /* Start screen mobile — fix title cutoff */
     #start-screen .brand-block h1 {
-      font-size: 28px;
-      letter-spacing: 0.15em;
+      font-size: 26px;
+      letter-spacing: 0.1em;
+      padding: 0 12px;
+      word-break: break-word;
     }
-    #start-screen .brand-block .credit { font-size: 12px; }
+    #start-screen .brand-block .credit { font-size: 12px; padding: 0 12px; }
 
     .how-to-play {
       padding: 16px 20px;
@@ -483,7 +531,7 @@
       -webkit-overflow-scrolling: touch;
       padding: 20px 12px;
       justify-content: flex-start;
-      padding-top: 10vh;
+      padding-top: 6vh;
     }
 
     /* Game over mobile */
@@ -492,7 +540,7 @@
     #gameover-screen .restart-hint { font-size: 12px; }
 
     /* Win screen mobile */
-    #win-screen .win-title { font-size: 20px; letter-spacing: 0.06em; }
+    #win-screen .win-title { font-size: 18px; letter-spacing: 0.04em; padding: 0 10px; }
     .punch-container { width: 160px; height: 160px; }
     .punch-svg-wrap svg { width: 160px; height: 160px; }
     #win-screen .win-subtitle { font-size: 14px; }
@@ -501,11 +549,13 @@
 
   /* Even smaller phones */
   @media (max-width: 380px) {
-    #start-screen .brand-block h1 { font-size: 22px; }
+    #start-screen .brand-block h1 { font-size: 22px; letter-spacing: 0.06em; }
     #dpad { width: 140px; height: 140px; bottom: 16px; }
     .dpad-btn { width: 44px; height: 44px; font-size: 18px; border-radius: 10px; }
     #canvas-wrap { padding-bottom: 170px; }
     #msg { bottom: 168px; }
+    .how-to-play { padding: 12px 14px; }
+    .overlay-screen { padding-top: 3vh; }
   }
 </style>
 </head>
@@ -533,10 +583,10 @@
 
 <!-- ═══════ D-PAD (mobile only) ═══════ -->
 <div id="dpad">
-  <div class="dpad-btn dpad-up" data-dir="up">▲</div>
-  <div class="dpad-btn dpad-down" data-dir="down">▼</div>
-  <div class="dpad-btn dpad-left" data-dir="left">◀</div>
-  <div class="dpad-btn dpad-right" data-dir="right">▶</div>
+  <div class="dpad-btn dpad-up" data-dir="up"><span class="arrow-icon arrow-up"></span></div>
+  <div class="dpad-btn dpad-down" data-dir="down"><span class="arrow-icon arrow-down"></span></div>
+  <div class="dpad-btn dpad-left" data-dir="left"><span class="arrow-icon arrow-left"></span></div>
+  <div class="dpad-btn dpad-right" data-dir="right"><span class="arrow-icon arrow-right"></span></div>
   <div class="dpad-center"></div>
 </div>
 
@@ -573,7 +623,7 @@
       <div class="rule-text"><strong>Eat 5 food dots to win!</strong> Reach the goal and earn a special surprise.</div>
     </div>
   </div>
-  <div class="start-hint" id="start-hint">Press any arrow key or WASD to start</div>
+  <button class="start-btn" id="tap-start">START GAME</button>
 </div>
 
 <!-- ═══════ GAME OVER ═══════ -->
@@ -875,14 +925,19 @@
     }
   });
 
-  // Touch controls — swipe anywhere on screen
+  // Touch controls — swipe on canvas area to steer
   let touchStart = null;
   document.addEventListener('touchstart', e => {
-    e.preventDefault(); // Prevent iOS scroll/zoom
+    // Don't block taps on buttons, overlays, or interactive elements
+    const tag = e.target.tagName.toLowerCase();
+    if (tag === 'button' || e.target.classList.contains('dpad-btn') || e.target.classList.contains('tap-restart') || e.target.classList.contains('start-btn')) {
+      return; // Let the button handle it
+    }
+    e.preventDefault();
     touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
   }, { passive: false });
   document.addEventListener('touchmove', e => {
-    e.preventDefault(); // Prevent iOS rubber-band
+    e.preventDefault();
   }, { passive: false });
   document.addEventListener('touchend', e => {
     if (!touchStart) return;
@@ -948,10 +1003,22 @@
   document.getElementById('win-restart').addEventListener('click', restartFromOverlay);
   document.getElementById('win-restart').addEventListener('touchend', restartFromOverlay);
 
-  // Detect mobile and update hint text
+  // Tap-to-start button (mobile)
+  function startFromTap(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (started) return;
+    started = true;
+    startScreen.classList.add('hidden');
+    resetGame();
+    running = true;
+  }
+  document.getElementById('tap-start').addEventListener('click', startFromTap);
+  document.getElementById('tap-start').addEventListener('touchend', startFromTap);
+
+  // Detect mobile and update message text
   const isMobile = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
   if (isMobile) {
-    document.getElementById('start-hint').textContent = 'Swipe or tap a direction to start';
     msgEl.textContent = 'Swipe or use the D-pad to move';
   }
 
